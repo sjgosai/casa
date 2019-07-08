@@ -78,7 +78,7 @@ def main(args):
     ##
     #######################################
     ## Line guide effects up to genome
-    targ_data = data[ (data['Coordinates'].str.contains("NT")) &\
+    targ_data = data[ (~data['Coordinates'].str.contains("NT")) &\
                       (data['Coordinates'] != 'FILLER-LV2') &\
                       (data['Coordinates'] != 'FILLER-SgO') ]
     plus_offsets = [152, 147]
