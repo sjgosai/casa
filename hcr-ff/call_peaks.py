@@ -79,8 +79,8 @@ def main(args):
     #######################################
     ## Line guide effects up to genome
     targ_data = data[ (~data['Coordinates'].str.contains("NT")) &\
-                      (data['Coordinates'] != 'FILLER-LV2') &\
-                      (data['Coordinates'] != 'FILLER-SgO') ]
+                      (~data['Coordinates'].str.contains('FILLER-LV2')) &\
+                      (~data['Coordinates'].str.contains('FILLER-SgO')) ]
     plus_offsets = [152, 147]
     minus_offsets= [146, 153]
     pos_array = np.array([ [ int(coord.split(':')[1].split('-')[1]) - plus_offsets[0],
