@@ -28,7 +28,7 @@ dsub \
 
 Alternatively, we can use the batch job feature of `dsub` by specifying a task file:
 
-my-tasks.tsv
+my-tasks.tsv:
 ```--env CHUNK	--input INFILE	--output OUTFILE
 0	gs://haddath/sgosai/hff/data/FADS1_rep8detailed.txt	gs://haddath/sgosai/hff/data/FADS1_rep8__0_20.bed
 1	gs://haddath/sgosai/hff/data/FADS1_rep8detailed.txt	gs://haddath/sgosai/hff/data/FADS1_rep8__1_20.bed
@@ -51,7 +51,8 @@ my-tasks.tsv
 18	gs://haddath/sgosai/hff/data/FADS1_rep8detailed.txt	gs://haddath/sgosai/hff/data/FADS1_rep8__18_20.bed
 19	gs://haddath/sgosai/hff/data/FADS1_rep8detailed.txt	gs://haddath/sgosai/hff/data/FADS1_rep8__19_20.bed```
 
-```dsub \
+```
+dsub \
 	--provider google-v2 \
 	--project sabeti-encode \
 	--zones "us-*" \
@@ -64,4 +65,5 @@ my-tasks.tsv
 	--tasks my-tasks.tsv \
 	--image sjgosai/hff-kit:0.1.2 \
 	--command 'python /app/hcr-ff/call_peaks.py ${INFILE} ${OUTFILE} -ji ${CHUNK} -jr 20 -ws 100 -ss 100' \
-	--wait &```
+	--wait &
+```
