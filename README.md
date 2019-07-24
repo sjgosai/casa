@@ -29,7 +29,8 @@ dsub \
 Alternatively, we can use the batch job feature of `dsub` by specifying a task file:
 
 my-tasks.tsv:
-```--env CHUNK	--input INFILE	--output OUTFILE
+```
+--env CHUNK	--input INFILE	--output OUTFILE
 0	gs://haddath/sgosai/hff/data/FADS1_rep8detailed.txt	gs://haddath/sgosai/hff/data/FADS1_rep8__0_20.bed
 1	gs://haddath/sgosai/hff/data/FADS1_rep8detailed.txt	gs://haddath/sgosai/hff/data/FADS1_rep8__1_20.bed
 2	gs://haddath/sgosai/hff/data/FADS1_rep8detailed.txt	gs://haddath/sgosai/hff/data/FADS1_rep8__2_20.bed
