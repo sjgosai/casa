@@ -50,7 +50,8 @@ my-tasks.tsv:
 16	gs://haddath/sgosai/hff/data/FADS1_rep8detailed.txt	gs://haddath/sgosai/hff/data/FADS1_rep8__16_20.bed
 17	gs://haddath/sgosai/hff/data/FADS1_rep8detailed.txt	gs://haddath/sgosai/hff/data/FADS1_rep8__17_20.bed
 18	gs://haddath/sgosai/hff/data/FADS1_rep8detailed.txt	gs://haddath/sgosai/hff/data/FADS1_rep8__18_20.bed
-19	gs://haddath/sgosai/hff/data/FADS1_rep8detailed.txt	gs://haddath/sgosai/hff/data/FADS1_rep8__19_20.bed```
+19	gs://haddath/sgosai/hff/data/FADS1_rep8detailed.txt	gs://haddath/sgosai/hff/data/FADS1_rep8__19_20.bed
+```
 
 ```
 dsub \
