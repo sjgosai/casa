@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import pymc3 as pm, theano.tensor as tt
 import os
+import sys
 import math
 import pickle
 import argparse
@@ -178,6 +179,8 @@ def main(args):
         
     if args.google_storage:
         push_to_cloud(args.output_data)
+        
+    print("Done.",file=sys.stderr)
     
 if __name__ == "__main__":
     args = get_args()
