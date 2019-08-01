@@ -92,6 +92,8 @@ def main(args):
     genome_lims = (np.min(pos_array), np.max(pos_array))
     sliding_window = np.vstack( (np.arange(*genome_lims,args.step_size), 
                                 np.minimum(np.arange(*genome_lims,args.step_size)+args.window_size,genome_lims[1])) ).T
+    sliding_window = sliding_window[[ np.any(check_overlap(interval,pos_array)) for 
+                                  interval in sliding_window ]]
     ## Get chromosome
     chrom = targ_data['Coordinates'].iloc[0].split(':')[0]
     #######################################
