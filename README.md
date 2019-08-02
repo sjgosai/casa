@@ -53,6 +53,8 @@ my-tasks.tsv:
 19	gs://haddath/sgosai/hff/data/FADS1_rep8detailed.txt	gs://haddath/sgosai/hff/data/FADS1_rep8__19_20.bed
 ```
 
+And then following up with this command:
+
 ```
 dsub \
 	--provider google-v2 \
@@ -69,3 +71,5 @@ dsub \
 	--command 'python /app/hcr-ff/call_peaks.py ${INFILE} ${OUTFILE} -ji ${CHUNK} -jr 20 -ws 100 -ss 100' \
 	--wait &
 ```
+
+Once this finishes running, you can pull the chunks from `bucket` storage and `cat` them together.
