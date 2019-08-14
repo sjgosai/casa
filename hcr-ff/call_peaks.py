@@ -10,14 +10,13 @@ import subprocess
 
 def get_args():    
     parser = argparse.ArgumentParser(description='Call peaks over CRISPRi screen windows.')
-    parser.add_argument('input_data',help='Directory containing validation data in tfrecords format.')
+    parser.add_argument('input_data',help='Input flow-fish count data.')
     parser.add_argument('output_data',help='BED format peak data.')
     parser.add_argument('--job_index','-ji',type=int,default=0,help='Job chunk index. 0 =< job_index < job_range.')
     parser.add_argument('--job_range','-jr',type=int,default=1,help='Number of chunks that peak calling will be split into.')
     parser.add_argument('--window_size','-ws',type=int,default=100,help='Window size for peak calling.')
     parser.add_argument('--step_size','-ss',type=int,default=100,help='Step size for peak calling.')
     parser.add_argument('--rope_threshold','-rt',default=0.693,type=float,help='ROPE threshold for peak calls.')
-    parser.add_argument('--google_storage','-gs',action='store_true',help='Raise to push result to gs://haddath/sgosai/hff/analysis')
     args = parser.parse_args()
     return args
 
@@ -34,11 +33,6 @@ def check_overlap(interval, array):
     intervals = np.stack([np.tile(interval,(height,1)), array],axis=0)
     anchor =  (intervals[0,:,0] < intervals[1,:,0]).astype(int)
     return intervals[1-anchor,np.arange(height),1] > intervals[anchor,np.arange(height),0]
-
-def push_to_cloud(filename):
-    sub_call = ['gsutil','cp',filename,'gs://haddath/sgosai/hff/analysis/']
-    subprocess.run(sub_call)
-    return None
 
 def main(args):
     check_args(args)
@@ -176,9 +170,6 @@ def main(args):
             interval_info = [chrom,peak_position[0],peak_position[1],
                              "{},{}".format(*region_hdr),region_call,'.']
             print("{}\t{}\t{}\t{}\t{}\t{}".format(*interval_info),file=f)
-        
-    if args.google_storage:
-        push_to_cloud(args.output_data)
         
     print("Done.",file=sys.stderr)
     
