@@ -35,12 +35,14 @@ def check_overlap(interval, array):
     return intervals[1-anchor,np.arange(height),1] > intervals[anchor,np.arange(height),0]
 
 def main(args):
+    print("Begin",file=sys.stderr)
     check_args(args)
     #######################################
     ##
     ## Import Data, remove missing guides
     ##
     #######################################
+    print("Import Data, remove missing guides",file=sys.stderr)
     data = pd.read_table(args.input_data, sep="\t", header=0)
     hs_zero = data['HS_reads'] > 0
     ls_zero = data['LS_reads'] > 0
@@ -51,6 +53,7 @@ def main(args):
     ## Downsample larger lib to comparible
     ##
     #######################################
+    print("Downsample",file=sys.stderr)
     ## Rescale to floats
     rescale = min(data['LS_reads'].sum(),data['HS_reads'].sum()) / data.loc[:,('HS_reads','LS_reads')].sum(axis=0)
     data.loc[:,('HS_reads','LS_reads')] *= rescale
@@ -72,6 +75,7 @@ def main(args):
     ## Organize positional information
     ##
     #######################################
+    print("Parse positional information",file=sys.stderr)
     ## Line guide effects up to genome
     targ_data = data[ (~data['Coordinates'].str.contains("NT")) &\
                       (~data['Coordinates'].str.contains('FILLER-LV2')) &\
@@ -96,6 +100,7 @@ def main(args):
     ## Process guide data 
     ##
     #######################################
+    print("Process guide data",file=sys.stderr)
     ovl_array = np.stack([ check_overlap(guide_interval,sliding_window) for guide_interval in pos_array ],axis=0).astype(int)
     ovl_array = np.concatenate((np.zeros_like(ovl_array[:,0:1]),ovl_array),axis=1)
     ovl_dex = pd.DataFrame(ovl_array,columns=["wnd_{}".format(i) for i in np.arange(ovl_array.shape[1])])
@@ -118,6 +123,7 @@ def main(args):
     ## Call peaks on chunk
     ##
     #######################################
+    print("Call peaks",file=sys.stderr)
     chunk_size = math.ceil( float(max_idx) / args.job_range )
     start_idx = 1 + (chunk_size * args.job_index)
     end_idx = start_idx + chunk_size

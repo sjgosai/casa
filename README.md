@@ -20,7 +20,7 @@ dsub \
 	--env CHUNK=0
 	--input INFILE=gs://haddath/sgosai/hff/data/FADS1_rep8detailed.txt \
 	--output OUTFILE=gs://haddath/sgosai/hff/data/FADS1_rep8__0_20.bed \
-	--image sjgosai/hff-kit:0.1.1 \
+	--image sjgosai/hff-kit:0.1.4 \
 	--command 'python /app/hcr-ff/call_peaks.py ${INFILE} ${OUTFILE} -ji ${CHUNK} -jr 20 -ws 100 -ss 100' \
 	--wait &
 
@@ -53,6 +53,8 @@ my-tasks.tsv:
 19	gs://haddath/sgosai/hff/data/FADS1_rep8detailed.txt	gs://haddath/sgosai/hff/data/FADS1_rep8__19_20.bed
 ```
 
+And then following up with this command:
+
 ```
 dsub \
 	--provider google-v2 \
@@ -65,7 +67,9 @@ dsub \
 	--preemptible \
 	--retries 3 \
 	--tasks my-tasks.tsv \
-	--image sjgosai/hff-kit:0.1.2 \
+	--image sjgosai/hff-kit:0.1.4 \
 	--command 'python /app/hcr-ff/call_peaks.py ${INFILE} ${OUTFILE} -ji ${CHUNK} -jr 20 -ws 100 -ss 100' \
 	--wait &
 ```
+
+Once this finishes running, you can pull the chunks from `bucket` storage and `cat` them together.
