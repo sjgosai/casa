@@ -63,7 +63,7 @@ def main(args):
         dsub_cmd = "dsub --provider google-v2 --project {} --zones {} " +\
                    "--logging {} --machine-type n1-highmem-8 " +\
                    "--boot-disk-size 250 --disk-size 200 " +\
-                   "--timeout 5h --tasks {} --image sjgosai/hff-kit:0.1.4 " +\
+                   "--timeout 5h --tasks {} --image sjgosai/hff-kit:0.1.6 " +\
                    "--command '{}' --wait"
         if args.preemptable:
             dsub_cmd += " --preemptible --retries 5"
