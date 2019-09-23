@@ -7,6 +7,7 @@ import math
 import pickle
 import argparse
 import subprocess
+from collections import OrderedDict
 
 def get_args():    
     parser = argparse.ArgumentParser(description='Call peaks over CRISPRi screen windows.')
@@ -54,7 +55,7 @@ def main(args):
     data = pd.read_table(args.input_data, sep="\t", header=0)
     hs_zero = data['HS_reads'] > 0
     ls_zero = data['LS_reads'] > 0
-    rm_zero = hs_zero * ls_zero
+    rm_zero = hs_zero & ls_zero
     data = data[ rm_zero ]
     #######################################
     ##
@@ -86,6 +87,7 @@ def main(args):
     print("Parse positional information",file=sys.stderr)
     ## Line guide effects up to genome
     targ_data = data[ (~data['Coordinates'].str.contains("NT")) &\
+                      (~data['Coordinates'].str.contains('CTRL')) &\
                       (~data['Coordinates'].str.contains('FILLER-LV2')) &\
                       (~data['Coordinates'].str.contains('FILLER-SgO')) ]
     plus_offsets = [152, 147]
@@ -130,13 +132,13 @@ def main(args):
     ovl_array = np.concatenate((np.zeros_like(ovl_array[:,0:1]),ovl_array),axis=1)
     ovl_dex = pd.DataFrame(ovl_array,columns=["wnd_{}".format(i) for i in np.arange(ovl_array.shape[1])])
 
-    NT_count = data.loc[(data['Coordinates'].str.contains("NT")),('Coordinates','HS_reads','LS_reads')].shape[0]
+    NT_count = data.loc[(data['Coordinates'].str.contains("NT") | data['Coordinates'].str.contains("CTRL")),('Coordinates','HS_reads','LS_reads')].shape[0]
     NT_hold = np.zeros((NT_count,ovl_array.shape[1])).astype(int)
     NT_hold[:,0] = 1
     NT_dex = pd.DataFrame(NT_hold,columns=["wnd_{}".format(i) for i in np.arange(ovl_array.shape[1])])
     
     wind_data = pd.concat((
-        pd.concat((data.loc[(data['Coordinates'].str.contains("NT")),('Coordinates','HS_reads','LS_reads')].reset_index(drop=True),
+        pd.concat((data.loc[(data['Coordinates'].str.contains("NT") | data['Coordinates'].str.contains("CTRL")),('Coordinates','HS_reads','LS_reads')].reset_index(drop=True),
                NT_dex.reset_index(drop=True)),axis=1).reset_index(drop=True)
         ,
         pd.concat((targ_data.loc[:,('Coordinates','HS_reads','LS_reads')].reset_index(drop=True),
