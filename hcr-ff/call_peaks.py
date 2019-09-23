@@ -31,8 +31,16 @@ def check_args(args):
 def check_overlap(interval, array):
     height = array.shape[0]
     intervals = np.stack([np.tile(interval,(height,1)), array],axis=0)
-    anchor =  (intervals[0,:,0] < intervals[1,:,0]).astype(int)
-    return intervals[1-anchor,np.arange(height),1] > intervals[anchor,np.arange(height),0]
+    swaghook = (intervals[0,:,0] < intervals[1,:,0]).astype(int)
+    return intervals[1-swaghook,np.arange(height),1] > intervals[swaghook,np.arange(height),0]
+
+def check_overlap_bed(interval, array):
+    height = array.shape[0]
+    intervals = np.stack([np.tile(interval,(height,1)), array],axis=0)
+    swaghook = (intervals[0,:,1] < intervals[1,:,1]).astype(int)
+    chrom    = (intervals[0,:,0] == intervals[0,:,0])
+    overlap  = intervals[1-swaghook,np.arange(height),2] > intervals[swaghook,np.arange(height),1]
+    return overlap & chrom
 
 def main(args):
     print("Begin",file=sys.stderr)
@@ -82,17 +90,33 @@ def main(args):
                       (~data['Coordinates'].str.contains('FILLER-SgO')) ]
     plus_offsets = [152, 147]
     minus_offsets= [146, 153]
-    pos_array = np.array([ [ int(coord.split(':')[1].split('-')[1]) - plus_offsets[0],
-                             int(coord.split(':')[1].split('-')[1]) + plus_offsets[1] ] if coord.split(':')[2] == '+' 
-                           else [ int(coord.split(':')[1].split('-')[1]) - minus_offsets[0],
-                                  int(coord.split(':')[1].split('-')[1]) + minus_offsets[1] ]
+    uniq_chrom= np.unique([coord.split(':')[0] for coord in targ_data['Coordinates']])
+    chrom2idx = OrderedDict( [ (x,i) for i,x in enumerate(uniq_chrom) ] )
+    idx2chrom = OrderedDict( [ (i,x) for i,x in enumerate(uniq_chrom) ] )
+    pos_array = np.array([ ( chrom2idx[coord.split(':')[0]],
+                             int(coord.split(':')[1].split('-')[1]) - plus_offsets[0],
+                             int(coord.split(':')[1].split('-')[1]) + plus_offsets[1] ) if coord.split(':')[2] == '+' 
+                           else ( chrom2idx[coord.split(':')[0]],
+                                  int(coord.split(':')[1].split('-')[1]) - minus_offsets[0],
+                                  int(coord.split(':')[1].split('-')[1]) + minus_offsets[1] )
                            for coord in targ_data['Coordinates'] ])
     ## Get genomic windows
-    genome_lims = (np.min(pos_array), np.max(pos_array))
-    sliding_window = np.vstack( (np.arange(*genome_lims,args.step_size), 
-                                np.minimum(np.arange(*genome_lims,args.step_size)+args.window_size,genome_lims[1])) ).T
-    sliding_window = sliding_window[[ np.any(check_overlap(interval,pos_array)) for 
-                                  interval in sliding_window ]]
+    genome_lims = OrderedDict(
+        [ (idx, 
+           (pos_array[pos_array[:,0] == idx, 1].min(),
+            pos_array[pos_array[:,0] == idx, 2].max())
+          ) for idx, chrom in idx2chrom.items() ] 
+    )
+    sliding_window = [ (idx, np.vstack( (np.arange(*lims,args.step_size),
+                                        np.minimum(np.arange(*lims,args.step_size)+args.window_size,lims[1])) ).T 
+                       )
+                       for idx, lims in genome_lims.items() ]
+    sliding_window = np.concatenate(
+        [ np.concatenate( (np.tile( [[idx]], (a_window.shape[0],1) ), a_window), axis=1 ) 
+          for idx, a_window in sliding_window ]
+    )
+    sliding_window = sliding_window[[ np.any(check_overlap_bed(interval,pos_array)) 
+                                      for interval in sliding_window ]]
     ## Get chromosome
     chrom = targ_data['Coordinates'].iloc[0].split(':')[0]
     #######################################
@@ -101,7 +125,8 @@ def main(args):
     ##
     #######################################
     print("Process guide data",file=sys.stderr)
-    ovl_array = np.stack([ check_overlap(guide_interval,sliding_window) for guide_interval in pos_array ],axis=0).astype(int)
+    ovl_array = np.stack([ check_overlap_bed(guide_interval,sliding_window) 
+                           for guide_interval in pos_array ],axis=0).astype(int)
     ovl_array = np.concatenate((np.zeros_like(ovl_array[:,0:1]),ovl_array),axis=1)
     ovl_dex = pd.DataFrame(ovl_array,columns=["wnd_{}".format(i) for i in np.arange(ovl_array.shape[1])])
 
@@ -173,7 +198,8 @@ def main(args):
             peak_position = sliding_window[j-1]
             region_hdr    = diff_hdr[i]
             region_call   = peak_calls[i] == False
-            interval_info = [chrom,peak_position[0],peak_position[1],
+            interval_info = [idx2chrom[peak_position[0]],
+                             peak_position[1],peak_position[2],
                              "{},{}".format(*region_hdr),region_call,'.']
             print("{}\t{}\t{}\t{}\t{}\t{}".format(*interval_info),file=f)
         
