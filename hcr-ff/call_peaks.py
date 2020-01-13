@@ -166,13 +166,19 @@ def main(args):
         use_data = wind_data[ np.sum(slicer,axis=1) == 1 ]
         slicer = slicer[ np.sum(slicer,axis=1) == 1 ]
         slicer = np.argmax(slicer, axis=1)
-        e_mean = np.mean(np.log(use_data['LS_reads'] / use_data['HS_reads']))
-        e_sd   = np.std(np.log(use_data['LS_reads'] / use_data['HS_reads']))
-        ct_mean = np.mean(use_data['LS_reads'].values+ use_data['HS_reads'].values)
-        ct_sd   = np.std(use_data['LS_reads'].values+ use_data['HS_reads'].values)
-
+        e_mean = np.mean(np.log(wind_data['LS_reads'] / wind_data['HS_reads']))
+        e_sd   = np.std(np.log(wind_data['LS_reads'] / wind_data['HS_reads']))
+        ct_mean= np.mean(wind_data['LS_reads'].values+ wind_data['HS_reads'].values)
+        ct_sd  = np.std(wind_data['LS_reads'].values+ wind_data['HS_reads'].values)
+        g_var  = (ct_sd**2) - ct_mean
+        if g_var <= 0:
+            g_sigma = ct_sd
+            print("Warning! Count data is underdispersed, results may be inaccurate.")
+        else:
+            g_sigma = np.sqrt(g_var)
+            
         with pm.Model() as model:
-            g = pm.Gamma('guide_intensity',mu=ct_mean,sigma=ct_sd)
+            g = pm.Gamma('guide_intensity',mu=ct_mean,sigma=g_sigma)
 
             e = pm.Normal('enhancer_activity', mu=e_mean, sigma=e_sd, shape=2)
             p = pm.Deterministic('bin_bias', tt.nnet.sigmoid(e))
