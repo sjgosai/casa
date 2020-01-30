@@ -178,9 +178,9 @@ def main(args):
             g_sigma = np.sqrt(g_var)
             
         with pm.Model() as model:
-            g = pm.Gamma('guide_intensity',mu=ct_mean,sigma=g_sigma)
+            g = pm.Gamma('guide_intensity',mu=ct_mean,sigma=g_sigma,shape=slicer.shape[0])
 
-            e = pm.Normal('enhancer_activity', mu=e_mean, sigma=e_sd, shape=2)
+            e = pm.Normal('enhancer_activity', mu=e_mean, sigma=e_sd,shape=2)
             p = pm.Deterministic('bin_bias', tt.nnet.sigmoid(e))
 
             l = pm.Deterministic('low_bin_theta', g*p[slicer] )
@@ -192,7 +192,7 @@ def main(args):
             h_ct = pm.Poisson('high_reads', mu=h, observed=use_data['HS_reads'])
 
         with model:
-            trace = pm.sample(1000, tune=1000, cores=8)
+            trace = pm.sample(1000, tune=4000, cores=8)
 
         hdr = pm.stats.hpd(trace['enhancer_boost'],alpha=0.001)
         thresh   = [-args.rope_threshold,args.rope_threshold]
