@@ -8,6 +8,9 @@ import argparse
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+if os.environ.get('DISPLAY') is None:
+    plt.switch_backend('agg')
+
 def get_args():    
     parser = argparse.ArgumentParser(description='Summarize CRISPRi screen guide-wise data as a signal track.')
     parser.add_argument('guide_data',help='Input flow-fish guide count data.')

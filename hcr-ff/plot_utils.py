@@ -198,6 +198,8 @@ def plot_combined_cutsites(plot_interval, cutsite_data, peak_data, plot_ids, mer
             collect_merge = []
             for exp_id in assay2exp[assay]:
                 exp_data  = sub_peaks.loc[ sub_peaks['exp_id'] == exp_id, : ]
+                if assay == 'GATA1':
+                    print(exp_data)
                 if exp_data.shape[0] > 0:
                     sub_merge = merge_bed(exp_data)
                     collect_merge.append( sub_merge )

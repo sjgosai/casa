@@ -78,3 +78,39 @@ def intersect_bed3(array1, array2):
                 right= min(shorter[i,2],overlap[j,2])
                 output.append([shorter[i,0],left,right])
     return pd.DataFrame(output,columns=['chr','start','end'])
+
+def get_replicating_peaks(bed_df, use_singletons=False):
+    uniq_assays = list(bed_df['assay'].unique())
+    assay_reps  = [ bed_df.loc[bed_df['assay'] == assay,'replicate'] \
+                      .unique() 
+                    for assay in uniq_assays ]
+    assay_count = [ len(rep_list) for rep_list in assay_reps ]
+    result_peaks= []
+    for assay, reps, count in zip(uniq_assays, assay_reps, assay_count):
+        if count == 1:
+            if use_singletons:
+                result_peaks.append( bed_df.loc[ bed_df['assay'] == assay, ('chr','start','end') ] )
+            else:
+                pass
+        else:
+            in_assay = []
+            assay_sub= bed_df[ bed_df['assay'] == assay ]
+            for rep in reps:
+                in_rep   = assay_sub[ assay_sub['replicate'] == rep ]
+                rep_merge= merge_bed(in_rep)
+                in_assay.append( rep_merge )
+            assay_merge = pd.concat(in_assay, axis=0).reset_index(drop=True)
+            assay_merge = merge_bed( assay_merge, count=True )
+            result_peaks.append( assay_merge.loc[ assay_merge['count'] > 1, ('chr','start','end') ] )
+    return pd.concat( result_peaks, axis=0 ).reset_index(drop=True)
+
+def extract_txn_starts(gff_df):
+    txn_starts_dict = {}
+    for i, line in gff_df.iterrows():
+        strand = line['strand']
+        geneID = line['geneID']
+        if strand == '+':
+            txn_starts_dict[ geneID ] = line['txStart']
+        elif strand == '-':
+            txn_starts_dict[ geneID ] = line['txEnd']
+    return txn_starts_dict
