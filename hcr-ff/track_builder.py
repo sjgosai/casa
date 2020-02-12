@@ -107,7 +107,7 @@ def main(args):
             if df_key == 'US_reads':
                 ax.set_xlim(0,2000)
             else:
-                ax.set_xlim(0,1000)
+                ax.set_xlim(0,2000)
         fig.tight_layout()
         fig.savefig("{}__sort_bin_count_hists.pdf".format(args.summ_plot_tag))
         # Activity log-odds
@@ -115,7 +115,7 @@ def main(args):
                            data['log(LS/HS)'][ data['Coordinates'] == 'NT' ],
                            data['log(LS/HS)'][ data['Coordinates'] != 'NT' ]]
         data_slice_tags = ["Marginal", "Non-targeting", "Any-targeting"]
-        fig, axes = plt.subplots(3,1,figsize=(5,15))
+        fig, axes = plt.subplots(3,1,figsize=(10,15))
         for basket in zip(data_slice_refs,data_slice_tags,axes.flat):
             ref, tag, ax = basket
             act_mean = ref.sum()/ref.shape[0]
@@ -129,8 +129,6 @@ def main(args):
             ax.set_title(lead_txt+stat_txt)
         fig.tight_layout()
         fig.savefig("{}__guide_activity_hists.pdf".format(args.summ_plot_tag))
-        axes[0,0].hist( data['log(LS/hS)'], bins=50 )
-        axes[0,0].set_xlim(-5,5)
     # Convert targeting data to tracks
     plus_offsets = [152, 147]
     minus_offsets= [146, 153]
