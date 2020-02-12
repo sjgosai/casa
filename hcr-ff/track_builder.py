@@ -128,7 +128,7 @@ def main(args):
             ax.set_xlim(-5,5)
             ax.set_title(lead_txt+stat_txt)
         fig.tight_layout()
-        fig.savefig("{}__guide_activity_hists.pdf")
+        fig.savefig("{}__guide_activity_hists.pdf".format(args.summ_plot_tag))
         axes[0,0].hist( data['log(LS/hS)'], bins=50 )
         axes[0,0].set_xlim(-5,5)
     # Convert targeting data to tracks
