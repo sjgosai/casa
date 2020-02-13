@@ -147,9 +147,18 @@ def plot_hff_cutsites(plot_interval, cutsite_data, peak_data, plot_ids, get_chro
     return fig, ax
 
 def plot_combined_cutsites(plot_interval, cutsite_data, peak_data, plot_ids, merge_style='replicate', get_chrom=None):
+    # Figure out how many reps we have for each assay
+    uniq_assays = list(peak_data['assay'].unique())
+    assay_reps  = [ peak_data.loc[peak_data['assay'] == assay,'replicate'] \
+                      .unique() 
+                    for assay in uniq_assays ]
+    assay_count = [ len(rep_list) for rep_list in assay_reps ]
+    assay2thresh= { assay: thresh for assay, thresh in zip(uniq_assays, assay_count) }
     if get_chrom is not None:
         cutsite_data = cutsite_data[ cutsite_data.index.str.contains(get_chrom+":") ]
         peak_data    = peak_data[ peak_data['chr'] == get_chrom ]
+    else:
+        pass
     # Subset cutsite scores
     plot_id_slicer = [an_id for an_id in plot_ids if an_id in cutsite_data.columns]
     sub_cuts = cutsite_data.loc[:,plot_id_slicer]
@@ -198,14 +207,15 @@ def plot_combined_cutsites(plot_interval, cutsite_data, peak_data, plot_ids, mer
             collect_merge = []
             for exp_id in assay2exp[assay]:
                 exp_data  = sub_peaks.loc[ sub_peaks['exp_id'] == exp_id, : ]
-                if assay == 'GATA1':
-                    print(exp_data)
                 if exp_data.shape[0] > 0:
                     sub_merge = merge_bed(exp_data)
                     collect_merge.append( sub_merge )
             merge_reps = pd.DataFrame()
-            if len(collect_merge)  == 1:
-                merge_reps = collect_merge[0]
+            if assay2thresh[assay] == 1:
+                if len(collect_merge) == 1:
+                    merge_reps = collect_merge[0]
+                else:
+                    pass
             elif len(collect_merge) > 1:
                 collect_merge = pd.concat(collect_merge,axis=0).reset_index(drop=True)
                 merge_reps = merge_bed(collect_merge, count=True)
@@ -267,6 +277,8 @@ def connect_bed_to_genes(ax, bed, gene_target, y_anchor=1.25, y_target=1.0, scor
             slicer= check_overlap([start,end],score_bed.loc[:,('start','end')].values)
             ovl   = score_bed[ slicer ]
             best  = ovl.iloc[ (ovl['score'] - midpt).abs().values.argmax() ]['score']
+            print("Interval: {}-{}, Score: {}, Pass: {}".format(int(line['start']), int(line['end']), best,ovl['pass'].sum() > 0))
+            print(ovl)
             if ovl['pass'].sum() > 0:
                 alph = np.abs(best-midpt) / cap
                 if best >= midpt:

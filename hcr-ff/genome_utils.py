@@ -102,7 +102,7 @@ def get_replicating_peaks(bed_df, use_singletons=False):
             assay_merge = pd.concat(in_assay, axis=0).reset_index(drop=True)
             assay_merge = merge_bed( assay_merge, count=True )
             result_peaks.append( assay_merge.loc[ assay_merge['count'] > 1, ('chr','start','end') ] )
-    return pd.concat( result_peaks, axis=0 ).reset_index(drop=True)
+    return merge_bed(pd.concat( result_peaks, axis=0 ).reset_index(drop=True))
 
 def extract_txn_starts(gff_df):
     txn_starts_dict = {}
