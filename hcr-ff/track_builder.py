@@ -190,7 +190,8 @@ def main(args):
     if args.median_shift:
         norm_factor = data[ 'log(LS/HS)' ].median()
         all_data["score"] = all_data["score"] - norm_factor
-    all_data.to_csv(args.output_file, sep="\t", quoting=csv.QUOTE_NONE, index=False)
+    all_data[('chr','start','end','guide_count','score')] \
+      .to_csv(args.output_file, sep="\t", quoting=csv.QUOTE_NONE, index=False)
     return None
 
 if __name__ == "__main__":
