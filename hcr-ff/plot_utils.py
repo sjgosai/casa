@@ -277,8 +277,6 @@ def connect_bed_to_genes(ax, bed, gene_target, y_anchor=1.25, y_target=1.0, scor
             slicer= check_overlap([start,end],score_bed.loc[:,('start','end')].values)
             ovl   = score_bed[ slicer ]
             best  = ovl.iloc[ (ovl['score'] - midpt).abs().values.argmax() ]['score']
-            print("Interval: {}-{}, Score: {}, Pass: {}".format(int(line['start']), int(line['end']), best,ovl['pass'].sum() > 0))
-            print(ovl)
             if ovl['pass'].sum() > 0:
                 alph = np.abs(best-midpt) / cap
                 if best >= midpt:
@@ -305,3 +303,22 @@ def connect_bed_to_genes(ax, bed, gene_target, y_anchor=1.25, y_target=1.0, scor
             ax.annotate('',xy=(gene_target,y_target),xytext=(block_anchor,y_anchor),
                         arrowprops=dict(arrowstyle="->",alpha=alph,color=col))
     return None
+
+def get_peak_strengths(*argv):
+    data = [ pd.read_table(fn, header=None, usecols= [0,1,2,3,4], 
+                           names=['chr','start','end','hdr','pass']) 
+             for fn in argv ]
+    [ df.set_index( ['chr','start','end'], inplace=True ) 
+      for df in data ]
+    for df in data:
+        df['score'] = [ np.array(interval.split(',')).astype(float).mean() 
+                        for interval in df['hdr'] ]
+        df['score'] = df['score'] - df['score'].median()
+        df['pass']  = df['pass'].astype(int)
+    hold = data[0][['score','pass']].copy()
+    for df in data[1:]:
+        toadd= df[['score','pass']].copy()
+        hold = hold.add(toadd,fill_value=0)
+    hold['score'] = hold['score'] / len(data)
+    hold['pass']  = hold['pass'] == len(argv)
+    return hold.reset_index()
