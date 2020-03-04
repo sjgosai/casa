@@ -18,6 +18,7 @@ def get_args():
     parser.add_argument('--window_size','-ws',type=int,default=100,help='Window size for peak calling.')
     parser.add_argument('--step_size','-ss',type=int,default=100,help='Step size for peak calling.')
     parser.add_argument('--rope_threshold','-rt',default=0.693,type=float,help='ROPE threshold for peak calls.')
+    parser.add_argument('--no_offsets','-no',action='store_true',help='Use exact coordinates for CRISPR activity. Use if Coordinates provided are exactly the region of effect.')
     args = parser.parse_args()
     return args
 
@@ -90,8 +91,12 @@ def main(args):
                       (~data['Coordinates'].str.contains('CTRL')) &\
                       (~data['Coordinates'].str.contains('FILLER-LV2')) &\
                       (~data['Coordinates'].str.contains('FILLER-SgO')) ]
-    plus_offsets = [152, 147]
-    minus_offsets= [146, 153]
+    if args.no_offsets:
+        plus_offsets = [0, 0]
+        minus_offsets= [0, 0]
+    else:
+        plus_offsets = [152, 147]
+        minus_offsets= [146, 153]
     uniq_chrom= np.unique([coord.split(':')[0] for coord in targ_data['Coordinates']])
     chrom2idx = OrderedDict( [ (x,i) for i,x in enumerate(uniq_chrom) ] )
     idx2chrom = OrderedDict( [ (i,x) for i,x in enumerate(uniq_chrom) ] )
