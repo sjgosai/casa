@@ -50,6 +50,7 @@ def main(args):
         ##                 ##
         #####################
         gs_cmd = 'gsutil cp {} {}/'.format(args.input_data,gs_loc)
+        print(gs_cmd)
         gs_put = subprocess.run(gs_cmd.split())
         ###################################
         ##                               ##
