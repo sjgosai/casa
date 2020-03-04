@@ -50,9 +50,10 @@ def check_overlap(interval, array):
 
 def check_overlap_bed(interval, array):
     height = array.shape[0]
-    intervals = np.stack([np.tile(interval,(height,1)), array],axis=0)
+    intervals= np.stack([np.tile(interval,(height,1)), array],axis=0)
+    intervals[:,:,1:3] = intervals[:,:,1:3].astype(int)
     swaghook = (intervals[0,:,1] < intervals[1,:,1]).astype(int)
-    chrom    = (intervals[0,:,0] == intervals[0,:,0])
+    chrom    = (intervals[0,:,0] == intervals[1,:,0])
     overlap  = intervals[1-swaghook,np.arange(height),2] > intervals[swaghook,np.arange(height),1]
     return overlap & chrom
 
@@ -110,7 +111,63 @@ def extract_txn_starts(gff_df):
         strand = line['strand']
         geneID = line['geneID']
         if strand == '+':
-            txn_starts_dict[ geneID ] = line['txStart']
+            txn_starts_dict[ geneID ] = (line['chrom'], line['txStart'])
         elif strand == '-':
-            txn_starts_dict[ geneID ] = line['txEnd']
+            txn_starts_dict[ geneID ] = (line['chrom'], line['txEnd'])
     return txn_starts_dict
+
+def write_interact_format(pack_peaks, pack_scores, pack_TSStuple, target_path, ex_tag="HCR_flowFISH"):
+    with open(target_path,'w') as f:
+        header = ['chrom','chromStart','chromEnd','name','score','value','exp',
+                  'color','sourceChrom','sourceStart','sourceEnd', 'sourceName',
+                  'sourceStrand','targetChrom','targetStart','targetEnd',
+                  'targetName','targetStrand']
+        print("\t".join(header),file=f)
+        for my_peaks, my_scores, my_TSStuple in zip(pack_peaks, pack_scores, pack_TSStuple):
+            tss_id, tss_chr, tss_nt = my_TSStuple
+            for a_row in my_peaks.iterrows():
+                a_peak = a_row[1]
+                full_tag  = "e{}:{}/{}/{}".format(tss_id,a_row[0],tss_id,ex_tag)
+                assemble_ = [a_peak['chr'],a_peak['start'],a_peak['end']]
+                hits = check_overlap_bed(a_peak.values,
+                                         my_scores.loc[:,('chr','start','end')].values)
+                grab_scores = my_scores.loc[hits,'score'].values
+                summit = np.argmax(np.abs(grab_scores))
+                peak_score  = grab_scores[summit]
+                assemble_.append(full_tag)               # string name
+                assemble_.append(0)                      # uint score
+                assemble_.append(peak_score)             # double value
+                assemble_.append(ex_tag)                 # string exp
+                assemble_.append("#000000")              # string color
+                assemble_.append(a_peak['chr'])          # string sourceChrom
+                assemble_.append(a_peak['start'])        # uint sourceStart
+                assemble_.append(a_peak['end'])          # uint sourceEnd
+                assemble_.append(full_tag.split('/')[0]) # string sourceName
+                assemble_.append('.')                    # string sourceStrand
+                assemble_.append(tss_chr)                # string targetChrom
+                assemble_.append(tss_nt)                 # uint targetStart
+                assemble_.append(int(tss_nt)+1)          # uint targetEnd
+                assemble_.append(full_tag.split('/')[1]) # string targetName
+                assemble_.append('.')                    # string targetStrand
+                print("\t".join(18*['{}']).format(*assemble_),file=f)
+    return None
+
+def write_bed_format(pack_peaks, pack_scores, pack_TSStuple, target_path, ex_tag="HCR_flowFISH"):
+    with open(target_path,'w') as f:
+        for my_peaks, my_scores, my_TSStuple in zip(pack_peaks, pack_scores, pack_TSStuple):
+            tss_id, tss_chr, tss_nt = my_TSStuple
+            for a_row in my_peaks.iterrows():
+                a_peak = a_row[1]
+                full_tag  = "e{}:{}/{}/{}".format(tss_id,a_row[0],tss_id,ex_tag)
+                assemble_ = [a_peak['chr'],a_peak['start'],a_peak['end']]
+                hits = check_overlap_bed(a_peak.values,
+                                         my_scores.loc[:,('chr','start','end')].values)
+                grab_scores = my_scores.loc[hits,'score'].values
+                summit = np.argmax(np.abs(grab_scores))
+                peak_score  = grab_scores[summit]
+                assemble_.append(peak_score)
+                assemble_.append(full_tag.split('/')[1])
+                assemble_.append('.')
+                print("\t".join(6*['{}']).format(*assemble_),file=f)
+    return None
+

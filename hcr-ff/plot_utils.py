@@ -263,7 +263,9 @@ def draw_bed_blocks(ax, bed, ylims=[1.25,1.75]):
         ax.fill_betweenx(ylims, start, end, facecolor='black')
     return None
 
-def connect_bed_to_genes(ax, bed, gene_target, y_anchor=1.25, y_target=1.0, score_bed=None, xlims=None):
+def connect_bed_to_genes(ax, bed, target_tuple, y_anchor=1.25, y_target=1.0, score_bed=None, xlims=None):
+    gene_chrom  = target_tuple[0]
+    gene_target = target_tuple[1]
     for i, line in bed.iterrows():
         start = int(line['start'])
         end   = int(line['end'])
@@ -310,10 +312,17 @@ def get_peak_strengths(*argv):
              for fn in argv ]
     [ df.set_index( ['chr','start','end'], inplace=True ) 
       for df in data ]
+    hold = [ np.array(row[1]['hdr'].split(',')).astype(float).mean() 
+              for row in data[0].iterrows() ]
+    min_peg = min(hold)
+    max_peg = max(hold)
     for df in data:
         df['score'] = [ np.array(interval.split(',')).astype(float).mean() 
                         for interval in df['hdr'] ]
-        df['score'] = df['score'] - df['score'].median()
+        min_space = min(df['score'])
+        max_space = max(df['score'])
+        scale_space = (max_peg - min_peg) / (max_space - min_space)
+        df['score'] = ((df['score'] - min_space) * scale_space) + min_peg
         df['pass']  = df['pass'].astype(int)
     hold = data[0][['score','pass']].copy()
     for df in data[1:]:
