@@ -13,6 +13,7 @@ def get_args():
     parser.add_argument('--window_size','-ws',type=int,default=100,help='Window size for peak calling.')
     parser.add_argument('--step_size','-ss',type=int,default=100,help='Step size for peak calling.')
     parser.add_argument('--rope_threshold','-rt',default=0.693,type=float,help='ROPE threshold for peak calls.')
+    parser.add_argument('--no_offsets','-no',action='store_true',help='Use exact coordinates for CRISPR activity. Use if Coordinates provided are exactly the region of effect.')
     parser.add_argument('--job_count','-j',type=int,default=1,help='Number of jobs to split analysis over.')
     parser.add_argument('--compute_zones','-z',type=str,default='us-*',help='Zones for VMs. Remember, costs very between zones.')
     parser.add_argument('--preemptable','-p',action='store_true',help='Flag to use preemptable VMs.')
@@ -58,12 +59,14 @@ def main(args):
         vm_cmd = "python /app/hcr-ff/call_peaks.py ${INFILE} ${OUTFILE} " +\
                  "-ji ${CHUNK} " + "-jr {} ".format(args.job_count) +\
                  "-ws {} -ss {}".format(args.window_size, args.step_size)
+        if args.no_offsets:
+            vm_cmd += " --no_offsets"
         format_list = [args.billed_project, args.compute_zones, 
                        os.path.join(gs_loc,'logs'), task_fn, vm_cmd]
         dsub_cmd = "dsub --provider google-v2 --project {} --zones {} " +\
                    "--logging {} --machine-type n1-highmem-8 " +\
                    "--boot-disk-size 250 --disk-size 200 " +\
-                   "--timeout 5h --tasks {} --image sjgosai/hff-kit:0.1.7 " +\
+                   "--timeout 5h --tasks {} --image sjgosai/hff-kit:0.1.9 " +\
                    "--command '{}' --wait"
         if args.preemptable:
             dsub_cmd += " --preemptible --retries 5"
