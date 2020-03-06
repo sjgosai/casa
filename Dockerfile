@@ -7,7 +7,7 @@ COPY . /app
 
 RUN apt-get update && \
   apt-get install g++ -y && \
-  conda env create -f hff_env.yml && \
+  conda env create -f casa_env.yml && \
   echo "source activate hff" >> ~/.bashrc
 
 ENV PATH /opt/conda/envs/hff/bin:$PATH
