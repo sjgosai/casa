@@ -136,7 +136,10 @@ Once this finishes running, you can pull the chunks from `bucket` storage and `c
 Alternatively, if you don't want to fiddle with `dsub` yourself, you can use `./src/wrap_peak_calling.py`:
 
 ```
-python ~/casa/src/wrap_peak_calling.py FADS1_rep1detailed.txt FADS1_rep1__allPeaks -b my-gcp-project -g gs://my-uniquely-named-bucket/ -ws 100 -ss 100 -z us* -p -j 100
+python ~/casa/src/wrap_peak_calling.py FADS1_rep1detailed.txt FADS1_rep1__allPeaks \ 
+                                       -b my-gcp-project \ 
+                                       -g gs://my-uniquely-named-bucket/ \ 
+                                       -ws 100 -ss 100 -z us* -p -j 100
 ```
 
 This script will generate a temporary directory for the analysis, copy `FADS1_rep1detailed.txt` to that location, generate the necessary `my-tasks.tsv` file, transfer the temp directory to `gs://my-uniquely-named-bucket/`, run the analysis, copy the output based on the `FADS1_rep1__allPeaks` (note the script takes a file tag, do NOT include extensions), and clean up the temporary work space. During this process, the machine running `./src/wrap_peak_calling.py` must remain connected to the internet.
