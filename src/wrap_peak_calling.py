@@ -57,7 +57,7 @@ def main(args):
         ## build dsub submission command ##
         ##                               ##
         ###################################
-        vm_cmd = "python /app/hcr-ff/call_peaks.py ${INFILE} ${OUTFILE} " +\
+        vm_cmd = "python /app/casa/call_peaks.py ${INFILE} ${OUTFILE} " +\
                  "-ji ${CHUNK} " + "-jr {} ".format(args.job_count) +\
                  "-ws {} -ss {}".format(args.window_size, args.step_size)
         if args.no_offsets:
