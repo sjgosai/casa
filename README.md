@@ -14,6 +14,7 @@ Once you have a recent version of `Anaconda` or `Miniconda`:
 
 ```
 git clone https://github.com/sjgosai/casa.git
+cd casa
 conda env create -f casa_env.yml
 ```
 
