@@ -32,7 +32,7 @@ The easiest way to run `CASA` is using `GCP` and `dsub`. You can install `gsutil
 
 ## Get a GCP account
 
-If you don't have a `GCP` account, you can get a [free trial](https://cloud.google.com/free/) with $300 in credit with your gmail account. This should be more than enough to try out HCR analysis. Once you have an account, [create a billing project](https://console.cloud.google.com/projectcreate). Keep track of the project ID, you'll need it later. For this README, we assumer the project ID is `my-gcp-project`.
+If you don't have a `GCP` account, you can get a [free trial](https://cloud.google.com/free/) with $300 in credit using your gmail account. This should be more than enough to try out HCR analysis. Once you have an account, [create a billing project](https://console.cloud.google.com/projectcreate). Keep track of the project ID, you'll need it later. For this README, we assumer the project ID is `my-gcp-project`.
 
 ## Install `gcloud` and `gsutil`
 
