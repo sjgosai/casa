@@ -53,6 +53,7 @@ Finally, you're ready to install dsub:
 ```
 conda activate base
 conda create --name dsub
+conda activate dsub
 pip install dsub
 dsub --help
 ```
@@ -142,4 +143,4 @@ python ~/casa/src/wrap_peak_calling.py FADS1_rep1detailed.txt FADS1_rep1__allPea
                                        -ws 100 -ss 100 -z us* -p -j 100
 ```
 
-This script will generate a temporary directory for the analysis, copy `FADS1_rep1detailed.txt` to that location, generate the necessary `my-tasks.tsv` file, transfer the temp directory to `gs://my-uniquely-named-bucket/`, run the analysis, copy the output based on the `FADS1_rep1__allPeaks` (note the script takes a file tag, do NOT include extensions), and clean up the temporary work space. During this process, the machine running `./src/wrap_peak_calling.py` must remain connected to the internet.
+This script will generate a temporary directory for the analysis, copy `FADS1_rep1detailed.txt` to that location, generate the necessary `my-tasks.tsv` file, transfer the temp directory to `gs://my-uniquely-named-bucket/`, run the analysis, copy the output based on `FADS1_rep1__allPeaks` (this should be a file tag, do NOT include extensions), and clean up the temporary work space. During this process, the machine running `./src/wrap_peak_calling.py` must remain connected to the internet.
