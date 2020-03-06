@@ -88,26 +88,26 @@ Alternatively, we can use the batch job feature of `dsub` by specifying a task f
 my-tasks.tsv:
 ```
 --env CHUNK	--input INFILE	--output OUTFILE
-0	gs://my-uniquely-named-bucket/FADS1_rep8detailed.txt	gs://my-uniquely-named-bucket/FADS1_rep8__0_20.bed
-1	gs://my-uniquely-named-bucket/FADS1_rep8detailed.txt	gs://my-uniquely-named-bucket/FADS1_rep8__1_20.bed
-2	gs://my-uniquely-named-bucket/FADS1_rep8detailed.txt	gs://my-uniquely-named-bucket/FADS1_rep8__2_20.bed
-3	gs://my-uniquely-named-bucket/FADS1_rep8detailed.txt	gs://my-uniquely-named-bucket/FADS1_rep8__3_20.bed
-4	gs://my-uniquely-named-bucket/FADS1_rep8detailed.txt	gs://my-uniquely-named-bucket/FADS1_rep8__4_20.bed
-5	gs://my-uniquely-named-bucket/FADS1_rep8detailed.txt	gs://my-uniquely-named-bucket/FADS1_rep8__5_20.bed
-6	gs://my-uniquely-named-bucket/FADS1_rep8detailed.txt	gs://my-uniquely-named-bucket/FADS1_rep8__6_20.bed
-7	gs://my-uniquely-named-bucket/FADS1_rep8detailed.txt	gs://my-uniquely-named-bucket/FADS1_rep8__7_20.bed
-8	gs://my-uniquely-named-bucket/FADS1_rep8detailed.txt	gs://my-uniquely-named-bucket/FADS1_rep8__8_20.bed
-9	gs://my-uniquely-named-bucket/FADS1_rep8detailed.txt	gs://my-uniquely-named-bucket/FADS1_rep8__9_20.bed
-10	gs://my-uniquely-named-bucket/FADS1_rep8detailed.txt	gs://my-uniquely-named-bucket/FADS1_rep8__10_20.bed
-11	gs://my-uniquely-named-bucket/FADS1_rep8detailed.txt	gs://my-uniquely-named-bucket/FADS1_rep8__11_20.bed
-12	gs://my-uniquely-named-bucket/FADS1_rep8detailed.txt	gs://my-uniquely-named-bucket/FADS1_rep8__12_20.bed
-13	gs://my-uniquely-named-bucket/FADS1_rep8detailed.txt	gs://my-uniquely-named-bucket/FADS1_rep8__13_20.bed
-14	gs://my-uniquely-named-bucket/FADS1_rep8detailed.txt	gs://my-uniquely-named-bucket/FADS1_rep8__14_20.bed
-15	gs://my-uniquely-named-bucket/FADS1_rep8detailed.txt	gs://my-uniquely-named-bucket/FADS1_rep8__15_20.bed
-16	gs://my-uniquely-named-bucket/FADS1_rep8detailed.txt	gs://my-uniquely-named-bucket/FADS1_rep8__16_20.bed
-17	gs://my-uniquely-named-bucket/FADS1_rep8detailed.txt	gs://my-uniquely-named-bucket/FADS1_rep8__17_20.bed
-18	gs://my-uniquely-named-bucket/FADS1_rep8detailed.txt	gs://my-uniquely-named-bucket/FADS1_rep8__18_20.bed
-19	gs://my-uniquely-named-bucket/FADS1_rep8detailed.txt	gs://my-uniquely-named-bucket/FADS1_rep8__19_20.bed
+0	gs://my-uniquely-named-bucket/FADS1_rep1detailed.txt	gs://my-uniquely-named-bucket/FADS1_rep1__0_20.bed
+1	gs://my-uniquely-named-bucket/FADS1_rep1detailed.txt	gs://my-uniquely-named-bucket/FADS1_rep1__1_20.bed
+2	gs://my-uniquely-named-bucket/FADS1_rep1detailed.txt	gs://my-uniquely-named-bucket/FADS1_rep1__2_20.bed
+3	gs://my-uniquely-named-bucket/FADS1_rep1detailed.txt	gs://my-uniquely-named-bucket/FADS1_rep1__3_20.bed
+4	gs://my-uniquely-named-bucket/FADS1_rep1detailed.txt	gs://my-uniquely-named-bucket/FADS1_rep1__4_20.bed
+5	gs://my-uniquely-named-bucket/FADS1_rep1detailed.txt	gs://my-uniquely-named-bucket/FADS1_rep1__5_20.bed
+6	gs://my-uniquely-named-bucket/FADS1_rep1detailed.txt	gs://my-uniquely-named-bucket/FADS1_rep1__6_20.bed
+7	gs://my-uniquely-named-bucket/FADS1_rep1detailed.txt	gs://my-uniquely-named-bucket/FADS1_rep1__7_20.bed
+8	gs://my-uniquely-named-bucket/FADS1_rep1detailed.txt	gs://my-uniquely-named-bucket/FADS1_rep1__8_20.bed
+9	gs://my-uniquely-named-bucket/FADS1_rep1detailed.txt	gs://my-uniquely-named-bucket/FADS1_rep1__9_20.bed
+10	gs://my-uniquely-named-bucket/FADS1_rep1detailed.txt	gs://my-uniquely-named-bucket/FADS1_rep1__10_20.bed
+11	gs://my-uniquely-named-bucket/FADS1_rep1detailed.txt	gs://my-uniquely-named-bucket/FADS1_rep1__11_20.bed
+12	gs://my-uniquely-named-bucket/FADS1_rep1detailed.txt	gs://my-uniquely-named-bucket/FADS1_rep1__12_20.bed
+13	gs://my-uniquely-named-bucket/FADS1_rep1detailed.txt	gs://my-uniquely-named-bucket/FADS1_rep1__13_20.bed
+14	gs://my-uniquely-named-bucket/FADS1_rep1detailed.txt	gs://my-uniquely-named-bucket/FADS1_rep1__14_20.bed
+15	gs://my-uniquely-named-bucket/FADS1_rep1detailed.txt	gs://my-uniquely-named-bucket/FADS1_rep1__15_20.bed
+16	gs://my-uniquely-named-bucket/FADS1_rep1detailed.txt	gs://my-uniquely-named-bucket/FADS1_rep1__16_20.bed
+17	gs://my-uniquely-named-bucket/FADS1_rep1detailed.txt	gs://my-uniquely-named-bucket/FADS1_rep1__17_20.bed
+18	gs://my-uniquely-named-bucket/FADS1_rep1detailed.txt	gs://my-uniquely-named-bucket/FADS1_rep1__18_20.bed
+19	gs://my-uniquely-named-bucket/FADS1_rep1detailed.txt	gs://my-uniquely-named-bucket/FADS1_rep1__19_20.bed
 ```
 
 And then following up with this command:
