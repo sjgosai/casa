@@ -20,7 +20,7 @@ dsub \
 	--env CHUNK=0
 	--input INFILE=gs://haddath/sgosai/hff/data/FADS1_rep8detailed.txt \
 	--output OUTFILE=gs://haddath/sgosai/hff/data/FADS1_rep8__0_20.bed \
-	--image sjgosai/hff-kit:0.1.6 \
+	--image sjgosai/casa-kit:0.2.1 \
 	--command 'python /app/casa/call_peaks.py ${INFILE} ${OUTFILE} -ji ${CHUNK} -jr 20 -ws 100 -ss 100' \
 	--wait &
 
@@ -67,7 +67,7 @@ dsub \
 	--preemptible \
 	--retries 3 \
 	--tasks my-tasks.tsv \
-	--image sjgosai/hff-kit:0.1.6 \
+	--image sjgosai/casa-kit:0.2.1 \
 	--command 'python /app/casa/call_peaks.py ${INFILE} ${OUTFILE} -ji ${CHUNK} -jr 20 -ws 100 -ss 100' \
 	--wait &
 ```
