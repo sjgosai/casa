@@ -1,5 +1,27 @@
-# hcr-ff
+# CASA
 Analysis of Sabiti Lab HCR Flow-FISH data.
+
+# Installation
+
+`CASA` is not a Python library, but a collection of scripts to execute analysis. Dependencies are managed using `conda`, so if you don't have that start with:
+
+```
+wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
+bash Miniconda3-latest-Linux-x86_64.sh
+```
+
+Once you have a recent version of `Anaconda` or `Miniconda`:
+
+```
+git clone https://github.com/sjgosai/casa.git
+conda env create -f casa_env.yml
+```
+
+Last, before using any code, activate your environment with:
+
+```
+source activate casa
+```
 
 # `dsub` pipeline
 To start, make sure you've setup `gcloud`, the [Google Cloud SDK](https://cloud.google.com/deployment-manager/docs/step-by-step-guide/installation-and-setup "GCloud SDK Docs") and run `gcloud auth application-default login`. Once you've done this, you need decide where your input/output data will be stored in Google Bucket Storage. For example, I want my input and output data to be stored in `gs://haddath/sgosai/hff/data/`.
