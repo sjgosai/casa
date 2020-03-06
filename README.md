@@ -21,8 +21,42 @@ conda env create -f casa_env.yml
 Last, before using any code, activate your environment with:
 
 ```
-source activate casa
+conda activate casa
 ```
+
+When everything is installed you should be ready to run all of the code in `./casa` and `./analysis`. However, `./casa/call_peaks.py` can process data in parallel on `GCP` using a docker environment with the above specs, and we've implemented a simple wrapper to do this which is dependent on `dsub`. To install:
+
+# `GCP` and `dsub` setup
+
+The easiest way to run `CASA` is using `GCP` and `dsub`. You can install `gsutil` and `dsub` anywhere (like on your MacBook or a VM) and run `CASA` on the cloud using `./src/wrap_peak_calling.py`. 
+
+## Get a GCP account
+
+If you don't have a `GCP` account, you can get a [free trial](https://cloud.google.com/free/) with $300 in credit with your gmail account. This should be more than enough to try out HCR analysis. Once you have an account, [create a billing project](https://console.cloud.google.com/projectcreate). Keep track of the project ID, you'll need it later.
+
+## Install `gcloud` and `gsutil`
+
+Next, setup the [Google Cloud SDK](https://cloud.google.com/deployment-manager/docs/step-by-step-guide/installation-and-setup "GCloud SDK Docs") and run `gcloud auth application-default login`. 
+
+## Make a storage bucket for your data
+
+Now, you need to configure where your input/output data will be stored in [Google Bucket Storage](https://cloud.google.com/storage/docs/quickstarts). For example, I want my input and output data to be stored in `gs://haddath/sgosai/hff/data/`. To do this, start by either using the `GCP` [console GUI](https://console.cloud.google.com/storage/browser) or `gsutil`:
+
+```
+gsutil mb -b on -l US gs://my-uniquely-named-bucket/
+```
+
+## Install `dsub`
+
+Finally, you're ready to install dsub:
+
+```
+conda activate base
+conda create --name dsub
+pip install dsub
+dsub --help
+```
+
 
 # `dsub` pipeline
 To start, make sure you've setup `gcloud`, the [Google Cloud SDK](https://cloud.google.com/deployment-manager/docs/step-by-step-guide/installation-and-setup "GCloud SDK Docs") and run `gcloud auth application-default login`. Once you've done this, you need decide where your input/output data will be stored in Google Bucket Storage. For example, I want my input and output data to be stored in `gs://haddath/sgosai/hff/data/`.
