@@ -10,4 +10,4 @@ RUN apt-get update && \
   conda env create -f casa_env.yml && \
   echo "source activate casa" >> ~/.bashrc
 
-ENV PATH /opt/conda/envs/hff/bin:$PATH
+ENV PATH /opt/conda/envs/casa/bin:$PATH
