@@ -1,14 +1,15 @@
 import numpy as np
 import pandas as pd
 
-def merge_intervals(intervals, count=False):
+def merge_intervals(intervals, count=False, req_overlap=False):
     sorted_intervals = intervals[ intervals[:,0].argsort() ]
     merged_intervals = sorted_intervals[0:1]
     counts = [1]
+    offset = int(req_overlap)
     for i in range(1,sorted_intervals.shape[0]):
         next_interval = sorted_intervals[i:i+1]
         last_interval = merged_intervals[-1:]
-        if next_interval[0,0] <= last_interval[0,1]:
+        if next_interval[0,0] <= (last_interval[0,1]-offset):
             new_max = max( next_interval[0,1], last_interval[0,1] )
             merged_intervals[-1,1] = new_max
             counts[-1] += 1
@@ -21,7 +22,7 @@ def merge_intervals(intervals, count=False):
     else:
         return merged_intervals
 
-def merge_bed(bed_df, count=False):
+def merge_bed(bed_df, count=False, req_overlap=False):
     bed_ = bed_df.sort_values(['chr','start'],axis=0) \
                  .reset_index(drop=True)
     chr_set = bed_['chr'].unique()
@@ -29,13 +30,13 @@ def merge_bed(bed_df, count=False):
     for chrom in chr_set:
         sub_bed = bed_.loc[ bed_['chr'] == chrom, ('start','end') ]
         if count:
-            merged_pos, counts = merge_intervals(sub_bed.values, True)
+            merged_pos, counts = merge_intervals(sub_bed.values, True, req_overlap)
             reorg_df= pd.DataFrame({'chr': chrom, 
                                     'start': merged_pos[:,0],
                                     'end': merged_pos[:,1], 
                                     'count': counts})
         else:
-            merged_pos = merge_intervals(sub_bed.values)
+            merged_pos = merge_intervals(sub_bed.values, False, req_overlap)
             reorg_df= pd.DataFrame({'chr': chrom, 
                                     'start': merged_pos[:,0],
                                     'end': merged_pos[:,1]})
@@ -101,7 +102,7 @@ def get_replicating_peaks(bed_df, use_singletons=False):
                 rep_merge= merge_bed(in_rep)
                 in_assay.append( rep_merge )
             assay_merge = pd.concat(in_assay, axis=0).reset_index(drop=True)
-            assay_merge = merge_bed( assay_merge, count=True )
+            assay_merge = merge_bed( assay_merge, count=True, req_overlap=True )
             result_peaks.append( assay_merge.loc[ assay_merge['count'] > 1, ('chr','start','end') ] )
     return merge_bed(pd.concat( result_peaks, axis=0 ).reset_index(drop=True))
 
@@ -163,11 +164,15 @@ def write_bed_format(pack_peaks, pack_scores, pack_TSStuple, target_path, ex_tag
                 hits = check_overlap_bed(a_peak.values,
                                          my_scores.loc[:,('chr','start','end')].values)
                 grab_scores = my_scores.loc[hits,'score'].values
+                grab_pass   = my_scores.loc[hits,'pass']
+                grab_sign   = my_scores.loc[hits,'sign']
+                conflict    = sum([ int(y) if x else 0 for x,y in zip(grab_pass,grab_sign) ]) != grab_pass.sum()
                 summit = np.argmax(np.abs(grab_scores))
                 peak_score  = grab_scores[summit]
                 assemble_.append(peak_score)
                 assemble_.append(full_tag.split('/')[1])
                 assemble_.append('.')
-                print("\t".join(6*['{}']).format(*assemble_),file=f)
+                if not conflict:
+                    print("\t".join(6*['{}']).format(*assemble_),file=f)
     return None
 
