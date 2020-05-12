@@ -319,15 +319,17 @@ def get_peak_strengths(*argv):
     for df in data:
         df['score'] = [ np.array(interval.split(',')).astype(float).mean() 
                         for interval in df['hdr'] ]
+        df['sign']  = ((df['score'] > 0).astype(int)*2)-1
         min_space = min(df['score'])
         max_space = max(df['score'])
         scale_space = (max_peg - min_peg) / (max_space - min_space)
         df['score'] = ((df['score'] - min_space) * scale_space) + min_peg
         df['pass']  = df['pass'].astype(int)
-    hold = data[0][['score','pass']].copy()
+    hold = data[0][['score','pass','sign']].copy()
     for df in data[1:]:
-        toadd= df[['score','pass']].copy()
+        toadd= df[['score','pass','sign']].copy()
         hold = hold.add(toadd,fill_value=0)
     hold['score'] = hold['score'] / len(data)
-    hold['pass']  = hold['pass'] == len(argv)
+    hold['pass']  = (hold['pass'] == len(argv))
+    hold['sign']  = (hold['sign'].abs() == len(argv))
     return hold.reset_index()
