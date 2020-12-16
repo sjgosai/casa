@@ -106,6 +106,25 @@ def get_replicating_peaks(bed_df, use_singletons=False):
             result_peaks.append( assay_merge.loc[ assay_merge['count'] > 1, ('chr','start','end') ] )
     return merge_bed(pd.concat( result_peaks, axis=0 ).reset_index(drop=True))
 
+def filter_by_guide_coverage(bed_df, guide_coords, min_coverage=30, 
+                             min_unit_coverage=None, min_unit_size=100, **kwargs):
+    targeting_guides = [ x for x in guide_coords if 'chr' in x ]
+    guide_windows = guide_coords_to_target_area(targeting_guides, **kwargs)
+    out_df = []
+    for i, a_peak in bed_df.iterrows():
+        peak_as_list = list( a_peak.values )
+        peak_overlaps= check_overlap_bed( peak_as_list[:3], guide_windows.values ).sum()
+        if min_unit_coverage is not None:
+            total_len = a_peak['end'] - a_peak['start']
+            n_units   = total_len / min_unit_size
+            if peak_overlaps > (n_units * min_unit_coverage):
+                out_df.append(peak_as_list+[peak_overlaps])
+        elif peak_overlaps > min_coverage:
+            out_df.append(peak_as_list+[peak_overlaps])
+            
+    out_df = pd.DataFrame(out_df, columns=list(bed_df.columns)+['guide_coverage'])
+    return out_df
+
 def extract_txn_starts(gff_df):
     txn_starts_dict = {}
     for i, line in gff_df.iterrows():
@@ -176,3 +195,13 @@ def write_bed_format(pack_peaks, pack_scores, pack_TSStuple, target_path, ex_tag
                     print("\t".join(6*['{}']).format(*assemble_),file=f)
     return None
 
+def guide_coords_to_target_area(coord_array, plus_offsets = [152, 147], minus_offsets= [146, 153]):
+    pos_array = [ ( coord.split(':')[0],
+                    int(coord.split(':')[1].split('-')[1]) - plus_offsets[0],
+                    int(coord.split(':')[1].split('-')[1]) + plus_offsets[1] ) if coord.split(':')[2] == '+' 
+                  else ( coord.split(':')[0],
+                         int(coord.split(':')[1].split('-')[1]) - minus_offsets[0],
+                         int(coord.split(':')[1].split('-')[1]) + minus_offsets[1] )
+                  for coord in coord_array ]
+    pos_array = pd.DataFrame(pos_array, columns=['chr','start','end'])
+    return pos_array

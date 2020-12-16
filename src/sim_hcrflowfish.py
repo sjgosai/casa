@@ -6,6 +6,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+import matplotlib as mpl
+mpl.rcParams['pdf.fonttype'] = 42
 import matplotlib.pyplot as plt
 import seaborn as sns
 
@@ -33,6 +35,8 @@ def get_args():
                         help='Mean number of simulated cells per guide.')
     parser.add_argument('--knockdown_fraction', type=float, default=0.5, 
                         help='Causal guide knockdown effect as a fraction of total possible effect.')
+    parser.add_argument('--guide_noise_fraction', type=float, default=0.1, 
+                        help='Fraction of noise attributable to guide effects.')
     args = parser.parse_args()
     return args
 
@@ -67,13 +71,15 @@ def mvn_mle(data):
 def simulate_hff(sam_mean, sam_cov, con_mean, con_cov, 
                  target, housekeeping, 
                  n_control_guides=1000, n_targeting_guides=20, 
-                 sort_depth=2000, ko_fractions=[0.5]):
+                 sort_depth=2000, ko_fractions=[0.5], guide_noise_fraction=0.1):
     sam_con_delta = sam_mean - con_mean
-    control_sets  = np.random.normal(0,max(0,sam_cov[1,1]-con_cov[1,1])**0.5,size=n_control_guides)
+    guide_cov, detect_cov = [guide_noise_fraction*sam_cov[1,1], (1-guide_noise_fraction)*sam_cov[1,1]]
+    con_cov[1,1]  = detect_cov
+    control_sets  = np.random.normal(0,guide_cov**0.5,size=n_control_guides)
     targeting_sets= []
     for i, ko_f in enumerate(ko_fractions):
         targeting_guides= np.random.normal(-ko_f*sam_con_delta[1].item(),
-                                           max(0,sam_cov[1,1]-con_cov[1,1])**0.5,size=n_targeting_guides)
+                                           guide_cov**0.5,size=n_targeting_guides)
         targeting_sets.append(targeting_guides)
     targeting_sets = np.concatenate(targeting_sets)
     
@@ -161,7 +167,8 @@ def main(args):
                              n_control_guides=args.n_control_guides, 
                              n_targeting_guides=args.n_targeting_guides, 
                              sort_depth=args.sorting_depth, 
-                             ko_fractions=n_windows*[args.knockdown_fraction])
+                             ko_fractions=n_windows*[args.knockdown_fraction],
+                             guide_noise_fraction=args.guide_noise_fraction)
     
     print("Simulated cells.", file=sys.stderr)
     
