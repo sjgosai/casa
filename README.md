@@ -1,5 +1,5 @@
 # CASA
-CRISPR activity screen analysis of Sabiti Lab HCR Flow-FISH data.
+CRISPR activity screen analysis of Sabeti Lab HCR Flow-FISH data.
 
 # Installation
 
