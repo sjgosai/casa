@@ -11,8 +11,20 @@ sys.path.insert(0, "../casa/")
 from genome_utils import *
 from plot_utils import *
 
-KNOWN_CONSTANTS = {'strandElement': '.', 'guideSpacerSeq': '.', 'guideSeq': '.', 'guideType': '.', 
-                   'SeqCounts': 'NaN', 'AnalysisMethod': 'CASA'}
+KNOWN_CONSTANTS = {'strandPerturbationTarget': '.', 
+                   'EffectSize95ConfidenceIntervalLow': 'NA',
+                   'EffectSize95ConfidenceIntervalHigh': 'NA', 
+                   'guideSpacerSeq': '.', 
+                   'guideSeq': '.', 
+                   'Significant': 'True',
+                   'pValue': 'NA', 
+                   'pValueAdjusted': 'NA', 
+                   'PowerAtEffectSize10': 'NA', 
+                   'PowerAtEffectSize25': 'NA', 
+                   'PowerAtEffectSize50': 'NA', 
+                   'ValidConnection': 'True', 
+                   'Notes': 'NA'
+                  }
 
 def get_args():
     parser = argparse.ArgumentParser(description='Convert CASA peaks from BED format to the ENCODE standard.')
@@ -20,20 +32,12 @@ def get_args():
     parser.add_argument('--casa_guide_file', help='One guide file used as CASA input, if using raw CASA outputs for `casa_peak_files`.')
     parser.add_argument('--gff_file',help='Gene definitions with items in the `geneID` column matching the `gene` column of the CASA post-processed peak files. Unused argument, feature in progress.')
     parser.add_argument('--min_guide_coverage', type=int, default=1, help='Minimum guide coverage for reporting peaks if using raw CASA output files.')
+    parser.add_argument('--use_singletons', action='store_true', help='Singleton flag for replicating peaks call.')
     parser.add_argument('--chrTSS', required=True, help='Chromosome of target transcription start site. (i.e., chrX).')
     parser.add_argument('--startTSS', required=True, help='First promoter nucleotide position.')
     parser.add_argument('--strandGene', required=True, help='Sense strand of target gene.')
     parser.add_argument('--measuredGeneSymbol', required=True, help='Common gene symbol of target gene.')
     parser.add_argument('--measuredEnsemblID', required=True, help='ENSEMBLE ID of target gene.')
-    parser.add_argument('--measuredGeneExpression', default='NaN', help='RPKM value or NaN.')
-    parser.add_argument('--PerturbationMethod', default='dCas9-KRAB', help='CRISPR based purturbation method.')
-    parser.add_argument('--ReadoutMethod', default='FlowFISH', help='Gene expression signal detection method.')
-    parser.add_argument('--GenomeBuild', default='hg38', help='Genome build.')
-    parser.add_argument('--CellType', required=True, help='Cell-type in which experiment was done.')
-    parser.add_argument('--BiosampleGeneticModification', default='NaN', help='Summary of genetic modifications to biosample.')
-    parser.add_argument('--BiosampleTreatments', default='NaN', help='Treatment used during experiment.')
-    parser.add_argument('--BiosampleTreatmentsAmount', default='NaN', help='Dosage of treatment used.')
-    parser.add_argument('--BiosampleTreatmentsDuration', default='NaN', help='Duration of treatment used.')
     parser.add_argument('--output_file', required=True, help='Output file path.')
     return parser.parse_args()
 
@@ -80,8 +84,8 @@ def get_bed_format(peaks, args):
         grab_pass   = scores.loc[hits, 'pass']
         grab_sign   = scores.loc[hits, 'sign']
         conflict    = sum([ int(y) if x else 0 for x,y in zip(grab_pass,grab_sign) ]) != grab_pass.sum()
-        summit = np.argmax(np.abs(grab_scores))
-        peak_score  = grab_scores[summit]
+        summit = np.argmax(np.abs(np.array(grab_scores)))
+        peak_score  = grab_scores.iloc[summit]
         assemble_.append(peak_score)
         assemble_.append(args.measuredGeneSymbol)
         assemble_.append('.')
@@ -90,20 +94,38 @@ def get_bed_format(peaks, args):
     return pd.DataFrame( scored_peaks, columns=['chr','start','end','score','gene','strand'] )
 
 def convert_casa_peaks(peak_df, peak_metadata=None):
-    all_keys = ['chrPerturbationTarget', 'startPerturbationTarget',
-       'endPerturbationTarget', 'chrTSS', 'startTSS', 'endTSS', 'name',
-       'EffectSize', 'strandElement', 'strandGene', 'measuredGeneSymbol',
-       'measuredEnsemblID', 'measuredGeneExpression', 'PerturbationTargetID',
-       'PerturbationMethod', 'ReadoutMethod', 'AnalysisMethod', 'GenomeBuild',
-       'CellType', 'BiosampleGeneticModification', 'BiosampleTreatments',
-       'BiosampleTreatmentsAmount', 'BiosampleTreatmentsDuration']
-    variable_keys = ['chrPerturbationTarget', 'startPerturbationTarget',
-                     'endPerturbationTarget', 'name', 'EffectSize', 'PerturbationTargetID']
+    all_keys = ['chrom',
+                'chromStart',
+                'chromEnd',
+                'name',
+                'EffectSize',
+                'strandPerturbationTarget',
+                'PerturbationTargetID',
+                'chrTSS',
+                'startTSS',
+                'endTSS',
+                'strandGene',
+                'EffectSize95ConfidenceIntervalLow',
+                'EffectSize95ConfidenceIntervalHigh',
+                'measuredGeneSymbol',
+                'measuredEnsemblID',
+                'guideSpacerSeq',
+                'guideSeq',
+                'Significant',
+                'pValue',
+                'pValueAdjusted',
+                'PowerAtEffectSize10',
+                'PowerAtEffectSize25',
+                'PowerAtEffectSize50',
+                'ValidConnection',
+                'Notes']
+    variable_keys = ['chrom', 'chromStart',
+                     'chromEnd', 'name', 'EffectSize', 'PerturbationTargetID']
     reformatted = []
     for i,x in peak_df.iterrows():
-        my_line = {'chrPerturbationTarget': x['chr'], 
-                   'startPerturbationTarget': x['start'], 
-                   'endPerturbationTarget': x['end'], 
+        my_line = {'chrom': x['chr'], 
+                   'chromStart': x['start'], 
+                   'chromEnd': x['end'], 
                    'name': '{}:{}-{}:.'.format(x['chr'], x['start'], x['end']), 
                    'EffectSize': x['score'], 
                    'PerturbationTargetID': '{}:{}-{}:.'.format(x['chr'], x['start'], x['end'])}
